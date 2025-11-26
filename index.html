@@ -1,102 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Demo Login – Entra External ID</title>
+    <meta charset="UTF-8">
+    <title>MS365 Login</title>
 
-  <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css" />
 
-  <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
-
-  <script>
-    const msalConfig = {
-      auth: {
-        clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
-        authority: "https://login.microsoftonline.com/8d58f40b-55de-4ac5-9838-498005242b2e",
-        redirectUri: "https://ms365-cyan.vercel.app/auth.html"
-      },
-      cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: true
-      }
-    };
-
-    const msalInstance = new msal.PublicClientApplication(msalConfig);
-
-    function updateUI() {
-      const accounts = msalInstance.getAllAccounts();
-      const loginBtn = document.getElementById("loginBtn");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const userInfo = document.getElementById("userInfo");
-
-      if (accounts.length > 0) {
-        const account = accounts[0];
-        userInfo.textContent = `Hola, ${account.name || account.username}`;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-      } else {
-        userInfo.textContent = "";
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-      }
-    }
-
-    window.onload = () => {
-      updateUI();
-    };
-  </script>
+    <script src="https://alcdn.msauth.net/browser/3.10.0/js/msal-browser.min.js"></script>
+    <script src="auth.js"></script>
 </head>
+<body onload="initializeAuth()">
 
-<body>
+    <div class="container">
+        <h1>Autenticación</h1>
 
-  <div class="container">
-    <div class="card">
-      <h1>Iniciar Sesión</h1>
+        <p id="welcome-msg">Cargando...</p>
 
-      <button id="loginBtn" class="btn">Iniciar sesión</button>
-      <button id="logoutBtn" class="btn btn-secondary">Cerrar sesión</button>
-
-      <p id="userInfo" class="user-info"></p>
+        <button id="login-btn" onclick="loginRedirect()">Iniciar sesión</button>
+        <button id="logout-btn" onclick="logoutRedirect()" style="display:none;">Cerrar sesión</button>
     </div>
-  </div>
-
-  <script>
-    // LOGIN
-    document.getElementById("loginBtn").onclick = async () => {
-      try {
-        // Evita iniciar login si ya está autenticado
-        if (msalInstance.getAllAccounts().length > 0) return;
-
-        await msalInstance.loginRedirect({
-          scopes: ["openid", "profile", "email"]
-        });
-
-      } catch (err) {
-        console.error(err);
-        alert("Error al iniciar sesión.");
-      }
-    };
-
-    // LOGOUT
-    document.getElementById("logoutBtn").onclick = async () => {
-      try {
-        const account = msalInstance.getAllAccounts()[0];
-        if (account) {
-          await msalInstance.logoutRedirect({
-            account: account,
-            postLogoutRedirectUri: "https://ms365-cyan.vercel.app/"
-          });
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    };
-  </script>
 
 </body>
 </html>
-
-
-
