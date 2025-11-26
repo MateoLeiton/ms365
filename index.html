@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,7 +8,6 @@
 
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- MSAL -->
   <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
 
   <script>
@@ -50,29 +50,36 @@
 </head>
 
 <body>
+
   <div class="container">
     <div class="card">
       <h1>Iniciar Sesión</h1>
+
       <button id="loginBtn" class="btn">Iniciar sesión</button>
       <button id="logoutBtn" class="btn btn-secondary">Cerrar sesión</button>
+
       <p id="userInfo" class="user-info"></p>
     </div>
   </div>
 
   <script>
-    // ---- LOGIN ----
+    // LOGIN
     document.getElementById("loginBtn").onclick = async () => {
       try {
+        // Evita iniciar login si ya está autenticado
+        if (msalInstance.getAllAccounts().length > 0) return;
+
         await msalInstance.loginRedirect({
           scopes: ["openid", "profile", "email"]
         });
+
       } catch (err) {
         console.error(err);
         alert("Error al iniciar sesión.");
       }
     };
 
-    // ---- LOGOUT ----
+    // LOGOUT
     document.getElementById("logoutBtn").onclick = async () => {
       try {
         const account = msalInstance.getAllAccounts()[0];
@@ -87,12 +94,9 @@
       }
     };
   </script>
+
 </body>
 </html>
-
-
-
-
 
 
 
