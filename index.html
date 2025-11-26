@@ -4,8 +4,18 @@
     <meta charset="UTF-8">
     <title>MS365 Login</title>
 
-    <link rel="stylesheet" href="styles.css" />
-</head>
+  <script>
+    const msalConfig = {
+      auth: {
+        clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
+        authority: "https://login.microsoftonline.com/8d58f40b-55de-4ac5-9838-498005242b2e",
+        redirectUri: "https://ms365-cyan.vercel.app/"
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: false
+      }
+    };
 
 <body>
 
@@ -32,5 +42,7 @@
         document.getElementById("logout-btn").onclick = logoutRedirect;
     </script>
 
-</body>
-</html>
+
+
+
+
