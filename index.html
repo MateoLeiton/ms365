@@ -1,12 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Demo Login – Entra External ID</title>
-  <link rel="stylesheet" href="styles.css">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- MSAL -->
   <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
+
+  <script>
+    const msalConfig = {
+      auth: {
+        clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
+        authority: "https://login.microsoftonline.com/8d58f40b-55de-4ac5-9838-498005242b2e",
+        redirectUri: "https://ms365-cyan.vercel.app/auth.html"
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: true
+      }
+    };
+
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+    function updateUI() {
+      const accounts = msalInstance.getAllAccounts();
+      const loginBtn = document.getElementById("loginBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const userInfo = document.getElementById("userInfo");
+
+      if (accounts.length > 0) {
+        const account = accounts[0];
+        userInfo.textContent = `Hola, ${account.name || account.username}`;
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "inline-block";
+      } else {
+        userInfo.textContent = "";
+        loginBtn.style.display = "inline-block";
+        logoutBtn.style.display = "none";
+      }
+    }
+
+    window.onload = () => {
+      updateUI();
+    };
+  </script>
 </head>
+
 <body>
   <div class="container">
     <div class="card">
@@ -18,68 +60,36 @@
   </div>
 
   <script>
-    const msalConfig = {
-      auth: {
-        clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
-        authority: "https://login.microsoftonline.com/8d58f40b-55de-4ac5-9838-498005242b2e",
-        redirectUri: "https://ms365-cyan.vercel.app/"
-      },
-      cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: false
-      }
-    };
-
-    const msalInstance = new msal.PublicClientApplication(msalConfig);
-
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const userInfo = document.getElementById("userInfo");
-
-    loginBtn.onclick = async () => {
+    // ---- LOGIN ----
+    document.getElementById("loginBtn").onclick = async () => {
       try {
-        const loginResponse = await msalInstance.loginPopup({ scopes: ["openid", "profile", "email"] });
-        console.log("loginResponse:", loginResponse);
-        const account = loginResponse.account;
-        userInfo.textContent = `Hola, ${account.name || account.username}`;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
+        await msalInstance.loginRedirect({
+          scopes: ["openid", "profile", "email"]
+        });
       } catch (err) {
         console.error(err);
-        alert("Error al iniciar sesión");
+        alert("Error al iniciar sesión.");
       }
     };
 
-    logoutBtn.onclick = async () => {
+    // ---- LOGOUT ----
+    document.getElementById("logoutBtn").onclick = async () => {
       try {
         const account = msalInstance.getAllAccounts()[0];
         if (account) {
-          await msalInstance.logoutPopup({ account });
+          await msalInstance.logoutRedirect({
+            account: account,
+            postLogoutRedirectUri: "https://ms365-cyan.vercel.app/"
+          });
         }
-        userInfo.textContent = "";
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
       } catch (err) {
         console.error(err);
-      }
-    };
-
-    // Verificar si ya está sesión activa al cargar la página
-    window.onload = () => {
-      const currentAccounts = msalInstance.getAllAccounts();
-      if (currentAccounts.length > 0) {
-        const account = currentAccounts[0];
-        userInfo.textContent = `Hola, ${account.name || account.username}`;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-      } else {
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
       }
     };
   </script>
 </body>
 </html>
+
 
 
 
