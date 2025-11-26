@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Procesando autenticación...</title>
+  <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
+</head>
+<body>
+  <script>
+    const msalConfig = {
+      auth: {
+        clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
+        authority: "https://login.microsoftonline.com/8d58f40b-55de-4ac5-9838-498005242b2e",
+        redirectUri: "https://ms365-cyan.vercel.app/auth.html"
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: false
+      }
+    };
+
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+    // Procesar respuesta del login
+    msalInstance.handleRedirectPromise().then((response) => {
+      if (response) {
+        // Guardar la cuenta
+        msalInstance.setActiveAccount(response.account);
+      }
+      // Redirigir al index
+      window.location.href = "/";
+    }).catch((error) => {
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
