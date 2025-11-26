@@ -1,4 +1,4 @@
-// MSAL configuration
+// ========== CONFIGURACIÓN MSAL ==========
 const msalConfig = {
     auth: {
         clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
@@ -11,9 +11,11 @@ const msalConfig = {
     }
 };
 
+// Se inicializa cuando MSAL YA ESTÁ CARGADO (gracias al orden correcto)
 const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-// When app loads on index.html
+
+// ========== INICIALIZADOR UI ==========
 async function initializeAuth() {
     try {
         const accounts = msalInstance.getAllAccounts();
@@ -28,14 +30,14 @@ async function initializeAuth() {
     }
 }
 
-// Login redirect
+
+// ========== LOGIN / LOGOUT ==========
 function loginRedirect() {
     msalInstance.loginRedirect({
         scopes: ["openid", "profile", "email"]
     });
 }
 
-// Logout
 function logoutRedirect() {
     const account = msalInstance.getAllAccounts()[0];
 
@@ -45,14 +47,14 @@ function logoutRedirect() {
     });
 }
 
-// Update UI when logged in
+
+// ========== UI ==========
 function updateUIForLoggedInUser(account) {
     document.getElementById("login-btn").style.display = "none";
     document.getElementById("logout-btn").style.display = "block";
     document.getElementById("welcome-msg").innerText = `Hola, ${account.username}`;
 }
 
-// Update UI when logged out
 function updateUIForLoggedOutUser() {
     document.getElementById("login-btn").style.display = "block";
     document.getElementById("logout-btn").style.display = "none";
