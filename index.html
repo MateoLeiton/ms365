@@ -1,21 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Demo Login – Entra External ID</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
-</head>
-<body>
-  <div class="container">
-    <div class="card">
-      <h1>Iniciar Sesión</h1>
-      <button id="loginBtn" class="btn">Iniciar sesión</button>
-      <button id="logoutBtn" class="btn btn-secondary">Cerrar sesión</button>
-      <p id="userInfo" class="user-info"></p>
-    </div>
-  </div>
+    <meta charset="UTF-8">
+    <title>MS365 Login</title>
 
   <script>
     const msalConfig = {
@@ -30,59 +17,30 @@
       }
     };
 
-    const msalInstance = new msal.PublicClientApplication(msalConfig);
+<body>
 
-    const loginBtn = document.getElementById("loginBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-    const userInfo = document.getElementById("userInfo");
+    <div class="container">
+        <h1>Autenticación</h1>
 
-    loginBtn.onclick = async () => {
-      try {
-        const loginResponse = await msalInstance.loginPopup({ scopes: ["openid", "profile", "email"] });
-        console.log("loginResponse:", loginResponse);
-        const account = loginResponse.account;
-        userInfo.textContent = `Hola, ${account.name || account.username}`;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-      } catch (err) {
-        console.error(err);
-        alert("Error al iniciar sesión");
-      }
-    };
+        <p id="welcome-msg">Cargando...</p>
 
-    logoutBtn.onclick = async () => {
-      try {
-        const account = msalInstance.getAllAccounts()[0];
-        if (account) {
-          await msalInstance.logoutPopup({ account });
-        }
-        userInfo.textContent = "";
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-      } catch (err) {
-        console.error(err);
-      }
-    };
+        <button id="login-btn">Iniciar sesión</button>
+        <button id="logout-btn" style="display:none;">Cerrar sesión</button>
+    </div>
 
-    // Verificar si ya está sesión activa al cargar la página
-    window.onload = () => {
-      const currentAccounts = msalInstance.getAllAccounts();
-      if (currentAccounts.length > 0) {
-        const account = currentAccounts[0];
-        userInfo.textContent = `Hola, ${account.name || account.username}`;
-        loginBtn.style.display = "none";
-        logoutBtn.style.display = "inline-block";
-      } else {
-        loginBtn.style.display = "inline-block";
-        logoutBtn.style.display = "none";
-      }
-    };
-  </script>
-</body>
-</html>
+    <!-- 1. Cargar MSAL primero -->
+    <script src="https://alcdn.msauth.net/browser/3.10.0/js/msal-browser.min.js"></script>
 
+    <!-- 2. Después cargar tu script -->
+    <script src="auth.js"></script>
 
+    <!-- 3. Ejecutar lo necesario ya con MSAL cargado -->
+    <script>
+        initializeAuth();     // Ahora sí funciona
 
+        document.getElementById("login-btn").onclick = loginRedirect;
+        document.getElementById("logout-btn").onclick = logoutRedirect;
+    </script>
 
 
 
