@@ -86,6 +86,12 @@
           font-size: 18px;
           color: #a0a0a0;
         }
+
+        .loading {
+          display: none;
+          margin-top: 20px;
+          color: #a0a0a0;
+        }
     </style>
 
     <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
@@ -100,6 +106,7 @@
             <button id="logoutBtn" class="btn btn-secondary">Cerrar sesión</button>
 
             <p id="userInfo" class="user-info"></p>
+            <p id="loading" class="loading">Procesando autenticación...</p>
         </div>
     </div>
 
@@ -108,10 +115,10 @@
         const msalConfig = {
             auth: {
                 clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
-                // OPCIÓN 1: Usando Tenant ID directamente (RECOMENDADO para External ID)
-                authority: "https://exterr.ciamlogin.com/EXTERR.onmicrosoft.com",
-                knownAuthorities: ["exterr.ciamlogin.com"],
-                redirectUri: "https://ms365-cyan.vercel.app/"
+                // Usando la autoridad correcta para External ID
+                authority: "https://8d58f40b-55de-4ac5-9838-498005242b2e.ciamlogin.com/8d58f40b-55de-4ac5-9838-498005242b2e",
+                redirectUri: "https://ms365-cyan.vercel.app/",
+                knownAuthorities: ["8d58f40b-55de-4ac5-9838-498005242b2e.ciamlogin.com"]
             },
             cache: {
                 cacheLocation: "localStorage",
@@ -124,42 +131,54 @@
         const loginBtn = document.getElementById("loginBtn");
         const logoutBtn = document.getElementById("logoutBtn");
         const userInfo = document.getElementById("userInfo");
+        const loading = document.getElementById("loading");
 
-        // Inicializar MSAL y manejar respuestas
+        // Inicializar MSAL
         msalInstance.initialize().then(() => {
             console.log("MSAL inicializado correctamente");
             
+            // Manejar la respuesta después del redirect
             msalInstance.handleRedirectPromise().then(response => {
+                loading.style.display = "none";
+                
                 if (response) {
-                    console.log("Respuesta de redirect:", response);
+                    console.log("Respuesta de autenticación:", response);
                     handleResponse(response);
                 } else {
+                    // Verificar si ya hay una sesión activa
                     checkAccount();
                 }
             }).catch(err => {
+                loading.style.display = "none";
                 console.error("Error en handleRedirectPromise:", err);
+                
+                if (err.errorCode) {
+                    alert(`Error: ${err.errorCode}\n\n${err.errorMessage}`);
+                }
             });
         }).catch(err => {
             console.error("Error al inicializar MSAL:", err);
+            loading.style.display = "none";
         });
 
+        // Evento de inicio de sesión - USA REDIRECT EN LUGAR DE POPUP
         loginBtn.onclick = async () => {
             try {
-                console.log("Iniciando login popup...");
+                console.log("Iniciando login con redirect...");
+                loading.style.display = "block";
                 
                 const loginRequest = {
                     scopes: ["openid", "profile", "email"],
                     prompt: "select_account"
                 };
 
-                const loginResponse = await msalInstance.loginPopup(loginRequest);
-                console.log("Login exitoso:", loginResponse);
-                handleResponse(loginResponse);
+                // CAMBIO PRINCIPAL: loginRedirect en lugar de loginPopup
+                await msalInstance.loginRedirect(loginRequest);
                 
             } catch (err) {
+                loading.style.display = "none";
                 console.error("Error completo:", err);
                 
-                // Mostrar más detalles del error
                 if (err.errorCode) {
                     console.error("Código de error:", err.errorCode);
                     console.error("Mensaje:", err.errorMessage);
@@ -175,15 +194,14 @@
                 const account = msalInstance.getAllAccounts()[0];
 
                 if (account) {
-                    await msalInstance.logoutPopup({ 
-                        account,
-                        mainWindowRedirectUri: "https://ms365-cyan.vercel.app/"
-                    });
+                    // También usa redirect para el logout
+                    const logoutRequest = {
+                        account: account,
+                        postLogoutRedirectUri: "https://ms365-cyan.vercel.app/"
+                    };
+                    
+                    await msalInstance.logoutRedirect(logoutRequest);
                 }
-
-                userInfo.textContent = "";
-                loginBtn.style.display = "inline-block";
-                logoutBtn.style.display = "none";
                 
             } catch (err) {
                 console.error("Error al cerrar sesión:", err);
@@ -193,7 +211,7 @@
         function handleResponse(response) {
             if (response && response.account) {
                 const account = response.account;
-                console.log("Cuenta:", account);
+                console.log("Cuenta autenticada:", account);
                 
                 userInfo.textContent = `Hola, ${account.name || account.username}`;
                 loginBtn.style.display = "none";
@@ -203,7 +221,7 @@
 
         function checkAccount() {
             const currentAccounts = msalInstance.getAllAccounts();
-            console.log("Cuentas actuales:", currentAccounts);
+            console.log("Cuentas en caché:", currentAccounts);
 
             if (currentAccounts.length > 0) {
                 const account = currentAccounts[0];
