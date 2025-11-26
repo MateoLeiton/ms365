@@ -21,19 +21,29 @@
 
     const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-    // Procesar respuesta del login
-    msalInstance.handleRedirectPromise()
-      .then((response) => {
-        if (response) {
+    async function handleAuth() {
+      try {
+        const response = await msalInstance.handleRedirectPromise();
+
+        if (response && response.account) {
+          console.log("Usuario autenticado:", response.account);
           msalInstance.setActiveAccount(response.account);
+        } else {
+          console.log("No hubo respuesta de login (probablemente volvió desde logout)");
         }
 
-        // Regresar al index
+        // Esta pausa es IMPORTANTE para asegurar que MSAL termine de escribir el cache
+        await new Promise(res => setTimeout(res, 300));
+
+        // Volver a index
         window.location.href = "https://ms365-cyan.vercel.app/";
-      })
-      .catch((error) => {
-        console.error("Error al procesar redirect:", error);
-      });
+      }
+      catch (err) {
+        console.error("Error procesando autenticación:", err);
+      }
+    }
+
+    handleAuth();
   </script>
 </head>
 
