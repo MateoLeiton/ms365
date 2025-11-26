@@ -104,16 +104,15 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN CORREGIDA PARA ENTRA EXTERNAL ID
+        // CONFIGURACIÓN CORRECTA PARA ENTRA EXTERNAL ID
         const msalConfig = {
             auth: {
                 clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
-                // CAMBIA ESTO: Usa la URL de External ID (ciamlogin.com)
-                // Formato: https://{nombre-tenant}.ciamlogin.com/
-                authority: "https://{TU-NOMBRE-TENANT}.ciamlogin.com/", 
+                // OPCIÓN 1: Usando Tenant ID directamente (RECOMENDADO para External ID)
+                authority: "https://8d58f40b-55de-4ac5-9838-498005242b2e.ciamlogin.com/8d58f40b-55de-4ac5-9838-498005242b2e",
                 redirectUri: "https://ms365-cyan.vercel.app/",
-                // Configuración adicional recomendada para External ID
-                knownAuthorities: ["{TU-NOMBRE-TENANT}.ciamlogin.com"]
+                // Añadir esta configuración para External ID
+                knownAuthorities: ["8d58f40b-55de-4ac5-9838-498005242b2e.ciamlogin.com"]
             },
             cache: {
                 cacheLocation: "localStorage",
@@ -127,9 +126,10 @@
         const logoutBtn = document.getElementById("logoutBtn");
         const userInfo = document.getElementById("userInfo");
 
-        // Inicializar MSAL
+        // Inicializar MSAL y manejar respuestas
         msalInstance.initialize().then(() => {
-            // Manejar la respuesta de redirección si existe
+            console.log("MSAL inicializado correctamente");
+            
             msalInstance.handleRedirectPromise().then(response => {
                 if (response) {
                     console.log("Respuesta de redirect:", response);
@@ -140,25 +140,33 @@
             }).catch(err => {
                 console.error("Error en handleRedirectPromise:", err);
             });
+        }).catch(err => {
+            console.error("Error al inicializar MSAL:", err);
         });
 
         loginBtn.onclick = async () => {
             try {
+                console.log("Iniciando login popup...");
+                
                 const loginRequest = {
                     scopes: ["openid", "profile", "email"],
-                    // Agregar prompt para forzar selección de cuenta
                     prompt: "select_account"
                 };
 
                 const loginResponse = await msalInstance.loginPopup(loginRequest);
-                console.log("loginResponse:", loginResponse);
+                console.log("Login exitoso:", loginResponse);
                 handleResponse(loginResponse);
+                
             } catch (err) {
                 console.error("Error completo:", err);
+                
+                // Mostrar más detalles del error
                 if (err.errorCode) {
-                    alert(`Error: ${err.errorCode}\n${err.errorMessage}`);
+                    console.error("Código de error:", err.errorCode);
+                    console.error("Mensaje:", err.errorMessage);
+                    alert(`Error: ${err.errorCode}\n\n${err.errorMessage}`);
                 } else {
-                    alert("Error al iniciar sesión");
+                    alert("Error al iniciar sesión. Revisa la consola para más detalles.");
                 }
             }
         };
@@ -177,14 +185,17 @@
                 userInfo.textContent = "";
                 loginBtn.style.display = "inline-block";
                 logoutBtn.style.display = "none";
+                
             } catch (err) {
-                console.error(err);
+                console.error("Error al cerrar sesión:", err);
             }
         };
 
         function handleResponse(response) {
             if (response && response.account) {
                 const account = response.account;
+                console.log("Cuenta:", account);
+                
                 userInfo.textContent = `Hola, ${account.name || account.username}`;
                 loginBtn.style.display = "none";
                 logoutBtn.style.display = "inline-block";
@@ -193,6 +204,7 @@
 
         function checkAccount() {
             const currentAccounts = msalInstance.getAllAccounts();
+            console.log("Cuentas actuales:", currentAccounts);
 
             if (currentAccounts.length > 0) {
                 const account = currentAccounts[0];
