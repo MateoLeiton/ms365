@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Procesando autenticación...</title>
+
   <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
-</head>
-<body>
+
   <script>
     const msalConfig = {
       auth: {
@@ -15,23 +15,29 @@
       },
       cache: {
         cacheLocation: "localStorage",
-        storeAuthStateInCookie: false
+        storeAuthStateInCookie: true
       }
     };
 
     const msalInstance = new msal.PublicClientApplication(msalConfig);
 
     // Procesar respuesta del login
-    msalInstance.handleRedirectPromise().then((response) => {
-      if (response) {
-        // Guardar la cuenta
-        msalInstance.setActiveAccount(response.account);
-      }
-      // Redirigir al index
-      window.location.href = "/";
-    }).catch((error) => {
-      console.error(error);
-    });
+    msalInstance.handleRedirectPromise()
+      .then((response) => {
+        if (response) {
+          msalInstance.setActiveAccount(response.account);
+        }
+
+        // Regresar al index
+        window.location.href = "https://ms365-cyan.vercel.app/";
+      })
+      .catch((error) => {
+        console.error("Error al procesar redirect:", error);
+      });
   </script>
+</head>
+
+<body>
+  Procesando autenticación...
 </body>
 </html>
