@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8" />
     <title>Procesando autenticación...</title>
-
-    <script src="https://alcdn.msauth.net/browser/3.10.0/js/msal-browser.min.js"></script>
-    <script src="auth.js"></script>
 </head>
 <body>
+
     <p>Procesando autenticación...</p>
 
+    <!-- MSAL primero -->
+    <script src="https://alcdn.msauth.net/browser/3.10.0/js/msal-browser.min.js"></script>
+
+    <!-- Tu script después -->
+    <script src="auth.js"></script>
+
+    <!-- Procesador del token -->
     <script>
         msalInstance.handleRedirectPromise()
         .then((response) => {
             if (response && response.account) {
                 msalInstance.setActiveAccount(response.account);
             }
-            // Return to index
+
             window.location.href = "https://ms365-cyan.vercel.app/";
         })
         .catch((error) => {
@@ -24,5 +29,6 @@
             window.location.href = "https://ms365-cyan.vercel.app/?error=auth";
         });
     </script>
+
 </body>
 </html>
