@@ -1,54 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Procesando autenticación...</title>
+    <meta charset="UTF-8" />
+    <title>Procesando autenticación...</title>
 
-  <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
-
-  <script>
-    const msalConfig = {
-      auth: {
-        clientId: "ddc5c2cb-1157-4967-bf0a-f8f9b338f9c1",
-        authority: "https://login.microsoftonline.com/8d58f40b-55de-4ac5-9838-498005242b2e",
-        redirectUri: "https://ms365-cyan.vercel.app/auth.html"
-      },
-      cache: {
-        cacheLocation: "localStorage",
-        storeAuthStateInCookie: true
-      }
-    };
-
-    const msalInstance = new msal.PublicClientApplication(msalConfig);
-
-    async function handleAuth() {
-      try {
-        const response = await msalInstance.handleRedirectPromise();
-
-        if (response && response.account) {
-          console.log("Login completado:", response.account);
-          msalInstance.setActiveAccount(response.account);
-        }
-
-        // Limpia estado de interacción pendiente
-        msalInstance.clearCache();
-
-        // Pequeño delay para garantizar limpieza
-        await new Promise(res => setTimeout(res, 150));
-
-        // Redirige al index
-        window.location.href = "https://ms365-cyan.vercel.app/";
-
-      } catch (err) {
-        console.error("Error al procesar redirect:", err);
-      }
-    }
-
-    handleAuth();
-  </script>
+    <script src="https://alcdn.msauth.net/browser/3.10.0/js/msal-browser.min.js"></script>
+    <script src="auth.js"></script>
 </head>
-
 <body>
-  Procesando autenticación...
+    <p>Procesando autenticación...</p>
+
+    <script>
+        msalInstance.handleRedirectPromise()
+        .then((response) => {
+            if (response && response.account) {
+                msalInstance.setActiveAccount(response.account);
+            }
+            // Return to index
+            window.location.href = "https://ms365-cyan.vercel.app/";
+        })
+        .catch((error) => {
+            console.error("Auth error:", error);
+            window.location.href = "https://ms365-cyan.vercel.app/?error=auth";
+        });
+    </script>
 </body>
 </html>
