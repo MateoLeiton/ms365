@@ -5,20 +5,32 @@
     <title>MS365 Login</title>
 
     <link rel="stylesheet" href="styles.css" />
-
-    <script src="https://alcdn.msauth.net/browser/3.10.0/js/msal-browser.min.js"></script>
-    <script src="auth.js"></script>
 </head>
-<body onload="initializeAuth()">
+
+<body>
 
     <div class="container">
         <h1>Autenticación</h1>
 
         <p id="welcome-msg">Cargando...</p>
 
-        <button id="login-btn" onclick="loginRedirect()">Iniciar sesión</button>
-        <button id="logout-btn" onclick="logoutRedirect()" style="display:none;">Cerrar sesión</button>
+        <button id="login-btn">Iniciar sesión</button>
+        <button id="logout-btn" style="display:none;">Cerrar sesión</button>
     </div>
+
+    <!-- 1. Cargar MSAL primero -->
+    <script src="https://alcdn.msauth.net/browser/3.10.0/js/msal-browser.min.js"></script>
+
+    <!-- 2. Después cargar tu script -->
+    <script src="auth.js"></script>
+
+    <!-- 3. Ejecutar lo necesario ya con MSAL cargado -->
+    <script>
+        initializeAuth();     // Ahora sí funciona
+
+        document.getElementById("login-btn").onclick = loginRedirect;
+        document.getElementById("logout-btn").onclick = logoutRedirect;
+    </script>
 
 </body>
 </html>
